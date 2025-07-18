@@ -1,8 +1,7 @@
 #!/bin/bash
-# filepath: /Users/dail1/cba/tools/armv/focus_mode.sh
 
+MODE="$1"  # Accept "on" or "off" as the first argument
 
-# Block distracting and shopping websites
 BLOCKED_SITES=(
 "facebook.com" "www.facebook.com"
 "youtube.com" "www.youtube.com"
@@ -25,7 +24,6 @@ BLOCKED_SITES=(
 "temu.com" "www.temu.com"
 "muji.com" "www.muji.com"
 "mujistore.com.au" "www.mujistore.com.au"
-# TV and video streaming sites
 "netflix.com" "www.netflix.com"
 "stan.com.au" "www.stan.com.au"
 "primevideo.com" "www.primevideo.com"
@@ -40,17 +38,8 @@ BLOCKED_SITES=(
 "dailymotion.com" "www.dailymotion.com"
 "twitch.tv" "www.twitch.tv"
 "vimeo.com" "www.vimeo.com"
-# Chinese TV/video sites
 "aigua.tv" "www.aigua.tv"
 )
-
-blocked_any=false
-for site in "${BLOCKED_SITES[@]}"; do
-if ! grep -E "^[^#]*127\.0\.0\.1[[:space:]]+$site" /etc/hosts > /dev/null; then
-    echo "127.0.0.1 $site" | sudo tee -a /etc/hosts > /dev/null
-    blocked_any=true
-fi
-done
 
 DISTRACTING_APPS=(
 "Messages"
@@ -58,47 +47,68 @@ DISTRACTING_APPS=(
 "Steam"
 "Discord"
 "Spotify"
-#"Minecraft"
 "Roblox"
-#"Safari"
 "Google Chrome"
 )
-
-
 
 HOUR=$(date +%H)
 MIN=$(date +%M)
 
-quit_any=false
-for app in "${DISTRACTING_APPS[@]}"; do
-  # Only quit Minecraft after school hours
-  if [ "$app" = "Minecraft" ]; then
-    if { [ "$HOUR" -lt 8 ] || [ "$HOUR" -gt 15 ] || { [ "$HOUR" -eq 15 ] && [ "$MIN" -ge 30 ]; }; }; then
+if [ "$MODE" = "on" ]; then
+  blocked_any=false
+  for site in "${BLOCKED_SITES[@]}"; do
+    if ! grep -E "^[^#]*127\.0\.0\.1[[:space:]]+$site" /etc/hosts > /dev/null; then
+      echo "127.0.0.1 $site" | sudo tee -a /etc/hosts > /dev/null
+      blocked_any=true
+    fi
+  done
+
+  quit_any=false
+  for app in "${DISTRACTING_APPS[@]}"; do
+    # Only quit Minecraft after school hours
+    if [ "$app" = "Minecraft" ]; then
+      if { [ "$HOUR" -lt 8 ] || [ "$HOUR" -gt 15 ] || { [ "$HOUR" -eq 15 ] && [ "$MIN" -ge 30 ]; }; }; then
+        if pgrep -x "$app" > /dev/null; then
+          osascript -e "tell application \"$app\" to quit" 2>/dev/null
+          quit_any=true
+        fi
+      fi
+    else
       if pgrep -x "$app" > /dev/null; then
         osascript -e "tell application \"$app\" to quit" 2>/dev/null
         quit_any=true
       fi
     fi
+  done
+
+  # Only enable or disable Do Not Disturb based on school hours
+  dnd_enabled=false
+  if { [ "$HOUR" -lt 8 ] || [ "$HOUR" -gt 15 ] || { [ "$HOUR" -eq 15 ] && [ "$MIN" -ge 30 ]; }; }; then
+    # After school hours: turn on Do Not Disturb if not already enabled
+    if ! defaults -currentHost read ~/Library/Preferences/ByHost/com.apple.notificationcenterui doNotDisturb 2>/dev/null | grep -q "1"; then
+      defaults -currentHost write ~/Library/Preferences/ByHost/com.apple.notificationcenterui doNotDisturb -boolean true
+      dnd_enabled=true
+    fi
   else
-    if pgrep -x "$app" > /dev/null; then
-      osascript -e "tell application \"$app\" to quit" 2>/dev/null
-      quit_any=true
+    # During school hours: turn off Do Not Disturb if enabled
+    if defaults -currentHost read ~/Library/Preferences/ByHost/com.apple.notificationcenterui doNotDisturb 2>/dev/null | grep -q "1"; then
+      defaults -currentHost write ~/Library/Preferences/ByHost/com.apple.notificationcenterui doNotDisturb -boolean false
     fi
   fi
-done
-# Only enable or disable Do Not Disturb based on school hours
-dnd_enabled=false
-if { [ "$HOUR" -lt 8 ] || [ "$HOUR" -gt 15 ] || { [ "$HOUR" -eq 15 ] && [ "$MIN" -ge 30 ]; }; }; then
-  # After school hours: turn on Do Not Disturb if not already enabled
-  if ! defaults -currentHost read ~/Library/Preferences/ByHost/com.apple.notificationcenterui doNotDisturb 2>/dev/null | grep -q "1"; then
-    defaults -currentHost write ~/Library/Preferences/ByHost/com.apple.notificationcenterui doNotDisturb -boolean true
-    dnd_enabled=true
+
+  if $blocked_any || $quit_any || $dnd_enabled; then
+    osascript -e 'display dialog "Stay focused and do your best work!" buttons {"OK"} with icon note'
   fi
+
+elif [ "$MODE" = "off" ]; then
+  # Remove blocked sites from /etc/hosts
+  sudo cp /etc/hosts /etc/hosts.bak
+  for site in "${BLOCKED_SITES[@]}"; do
+    sudo sed -i '' "/127\.0\.0\.1[[:space:]]\+$site/d" /etc/hosts
+  done
+  # Disable Do Not Disturb
+  defaults -currentHost write ~/Library/Preferences/ByHost/com.apple.notificationcenterui doNotDisturb -boolean false
+  echo "Focus mode disabled."
 else
-  # During school hours: turn off Do Not Disturb if enabled
-  if defaults -currentHost read ~/Library/Preferences/ByHost/com.apple.notificationcenterui doNotDisturb 2>/dev/null | grep -q "1"; then
-    defaults -currentHost write ~/Library/Preferences/ByHost/com.apple.notificationcenterui doNotDisturb -boolean false
-  fi
+  echo "Usage: $0 [on|off]"
 fi
-
-
