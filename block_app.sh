@@ -1,5 +1,14 @@
 #!/bin/bash
 
+START_DATE="2024-07-22"
+TODAY=$(date +%Y-%m-%d)
+
+# Only run blocking logic if today is on or after 22 July 2024
+if [[ "$TODAY" < "$START_DATE" ]]; then
+  echo "Focus mode blocking will take effect from $START_DATE."
+  exit 0
+fi
+
 DISTRACTING_APPS=(
   "Messages"
   "FaceTime"
