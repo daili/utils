@@ -96,9 +96,7 @@ if [ "$MODE" = "on" ]; then
     fi
   fi
 
-  if $blocked_any || $quit_any || $dnd_enabled; then
-    osascript -e 'display dialog "Stay focused and do your best work!" buttons {"OK"} with icon note'
-  fi
+
 
 elif [ "$MODE" = "off" ]; then
   # Remove blocked sites from /etc/hosts
