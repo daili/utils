@@ -94,31 +94,16 @@ if [ "$MODE" = "on" ]; then
     fi
   done
 
-  dnd_enabled=false
-  if { [ "$HOUR" -lt 8 ] || [ "$HOUR" -gt 15 ] || { [ "$HOUR" -eq 15 ] && [ "$MIN" -ge 30 ]; }; }; then
-    if ! su -l "$TARGET_USER" -c 'defaults -currentHost read ~/Library/Preferences/ByHost/com.apple.notificationcenterui doNotDisturb 2>/dev/null' | grep -q "1"; then
-      su -l "$TARGET_USER" -c 'defaults -currentHost write ~/Library/Preferences/ByHost/com.apple.notificationcenterui doNotDisturb -boolean true'
-      echo "[INFO] Do Not Disturb enabled for $TARGET_USER"
-      dnd_enabled=true
-    fi
-  else
-    if su -l "$TARGET_USER" -c 'defaults -currentHost read ~/Library/Preferences/ByHost/com.apple.notificationcenterui doNotDisturb 2>/dev/null' | grep -q "1"; then
-      su -l "$TARGET_USER" -c 'defaults -currentHost write ~/Library/Preferences/ByHost/com.apple.notificationcenterui doNotDisturb -boolean false'
-      echo "[INFO] Do Not Disturb disabled for $TARGET_USER"
-    fi
-  fi
 
 elif [ "$MODE" = "off" ]; then
   cp /etc/hosts /etc/hosts.bak
   echo "[INFO] Backed up /etc/hosts to /etc/hosts.bak"
   for site in "${BLOCKED_SITES[@]}"; do
     if grep -E "^[^#]*127\.0\.0\.1[[:space:]]+$site" /etc/hosts > /dev/null; then
-      sed -i '' "/127\.0\.0\.1[[:space:]]\+$site/d" /etc/hosts
+      sed -i '' "/^127\.0\.0\.1 $site/d" /etc/hosts
       echo "[INFO] Unblocked site: $site"
     fi
   done
-  su -l "$TARGET_USER" -c 'defaults -currentHost write ~/Library/Preferences/ByHost/com.apple.notificationcenterui doNotDisturb -boolean false'
-  echo "[INFO] Do Not Disturb disabled for $TARGET_USER"
   echo "Focus mode disabled."
 else
   echo "Usage: $0 [on|off]"
