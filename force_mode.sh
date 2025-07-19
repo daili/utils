@@ -63,7 +63,7 @@ DISTRACTING_APPS=(
 
 HOUR=$(date +%H)
 MIN=$(date +%M)
-TARGET_USER="dail1"
+TARGET_USER="lidai"
 
 if [ "$MODE" = "on" ]; then
   blocked_any=false
