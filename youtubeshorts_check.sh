@@ -3,9 +3,9 @@
 # Path to Safari history database
 HISTORY_DB="$HOME/Library/Safari/History.db"
 
-# Current time and 5 minutes ago in Apple Epoch (Jan 1, 2001)
+# Current time and 3 minutes ago in Apple Epoch (Jan 1, 2001)
 NOW=$(date +%s)
-FIVE_MIN_AGO=$((NOW - 300))                    # 300 seconds = 5 minutes
+FIVE_MIN_AGO=$((NOW - 180))                    # 300 seconds = 5 minutes
 APPLE_EPOCH=978307200
 START_TIME=$((FIVE_MIN_AGO - APPLE_EPOCH))
 END_TIME=$((NOW - APPLE_EPOCH))
