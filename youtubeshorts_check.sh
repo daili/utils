@@ -22,7 +22,7 @@ AND visit_time BETWEEN $START_TIME AND $END_TIME;
 # If any Shorts found, show alert
 if [[ -n "$FOUND" ]]; then
     echo "youtubeshortviolation" >> /tmp/.youtube.violation.log
-    osascript -e 'display alert "Warning" message "YouTube Shorts were visited in the past 3 minutes! If you continue watching, youtube will be banned!" as critical'
+    osascript -e 'display alert "Warning" message "YouTube Shorts were visited in the past 3 minutes! If you continue watching, YouTube will be banned!" as critical'
 else
     echo "No YouTube Shorts visited in the past 3 minutes."
 fi
