@@ -5,7 +5,7 @@ HISTORY_DB="$HOME/Library/Safari/History.db"
 
 # Current time and 3 minutes ago in Apple Epoch (Jan 1, 2001)
 NOW=$(date +%s)
-FIVE_MIN_AGO=$((NOW - 180))                    # 300 seconds = 5 minutes
+FIVE_MIN_AGO=$((NOW - 180))                    # 180 seconds = 3 minutes
 APPLE_EPOCH=978307200
 START_TIME=$((FIVE_MIN_AGO - APPLE_EPOCH))
 END_TIME=$((NOW - APPLE_EPOCH))
@@ -22,8 +22,8 @@ AND visit_time BETWEEN $START_TIME AND $END_TIME;
 # If any Shorts found, show alert
 if [[ -n "$FOUND" ]]; then
     echo "youtubeshortviolation" >> /tmp/.youtube.violation.log
-    osascript -e 'display alert "Warning" message "YouTube Shorts were visited in the past 5 minutes!" as critical'
+    osascript -e 'display alert "Warning" message "YouTube Shorts were visited in the past 3 minutes! If you continue watching, youtube will be banned!" as critical'
 else
-    echo "No YouTube Shorts visited in the past 5 minutes."
+    echo "No YouTube Shorts visited in the past 3 minutes."
 fi
 
