@@ -12,8 +12,11 @@ MIN=$(date +%M)
 DAY=$(date +%u) # 1=Monday ... 5=Friday
 
 is_school_hours() {
-  [ "$DAY" -ge 1 ] && [ "$DAY" -le 5 ] && [ "$HOUR" -ge 8 ] && { [ "$HOUR" -lt 15 ] || { [ "$HOUR" -eq 15 ] && [ "$MIN" -lt 30 ]; }; }
+  [ "$DAY" -ge 1 ] && [ "$DAY" -le 5 ] && \
+  { [ "$HOUR" -gt 8 ] || { [ "$HOUR" -eq 8 ] && [ "$MIN" -ge 15 ]; }; } && \
+  { [ "$HOUR" -lt 15 ] || { [ "$HOUR" -eq 15 ] && [ "$MIN" -le 15 ]; }; }
 }
+
 
 check_safari_shorts() {
   SAFARI_HISTORY="$HOME/Library/Safari/History.db"

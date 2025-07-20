@@ -4,9 +4,11 @@ YOUTUBE_SITES=("youtube.com" "www.youtube.com")
 MARKER_FILE="/tmp/youtube_shorts_blocked"
 
 is_school_hours() {
-  DAY=$(date +%u) # 1=Monday ... 5=Friday
-  [ "$DAY" -ge 1 ] && [ "$DAY" -le 5 ] && [ "$HOUR" -ge 8 ] && { [ "$HOUR" -lt 15 ] || { [ "$HOUR" -eq 15 ] && [ "$MIN" -lt 30 ]; }; }
+  [ "$DAY" -ge 1 ] && [ "$DAY" -le 5 ] && \
+  { [ "$HOUR" -gt 8 ] || { [ "$HOUR" -eq 8 ] && [ "$MIN" -ge 15 ]; }; } && \
+  { [ "$HOUR" -lt 15 ] || { [ "$HOUR" -eq 15 ] && [ "$MIN" -le 15 ]; }; }
 }
+
 
 
 blocked_any=false
