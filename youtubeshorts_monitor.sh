@@ -40,8 +40,8 @@ if is_school_hours; then
       touch "$MARKER_FILE"
       echo "[WARNING] YouTube Shorts marker file created: $MARKER_FILE"
     else
-      osascript -e 'display dialog "Warning: YouTube Shorts visited in Safari during school hours!" buttons {"OK"} with icon caution'
-      echo "[WARNING] YouTube Shorts visited in Safari during school hours! Warning $WARN_COUNT/$WARN_LIMIT"
+      osascript -e 'display dialog "Warning: YouTube Shorts visited in Safari during school hours!\nYouTube will probably be banned soon due to repeated Shorts visits." buttons {"OK"} with icon caution'
+      echo "[WARNING] YouTube Shorts visited in Safari during school hours! Warning $WARN_COUNT/$WARN_LIMIT. YouTube will probably be banned soon due to Shorts visits."
     fi
   else
     echo "0" > "$WARN_COUNT_FILE"
