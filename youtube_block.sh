@@ -17,8 +17,15 @@ is_school_hours() {
 blocked_any=false
 
 if is_school_hours; then
-  # During school hours, unblock YouTube if marker is not present
-  if [ ! -f "$MARKER_FILE" ]; then
+  # During school hours, check marker
+  if [ -f "$MARKER_FILE" ]; then
+    for site in "${YOUTUBE_SITES[@]}"; do
+      if ! grep -E "^[^#]*127\.0\.0\.1[[:space:]]+$site" /etc/hosts > /dev/null; then
+        echo "127.0.0.1 $site" | sudo tee -a /etc/hosts > /dev/null
+        echo "[WARNING] Blocked YouTube during school hours due to marker: $site"
+      fi
+    done
+  else
     for site in "${YOUTUBE_SITES[@]}"; do
       if grep -E "^[^#]*127\.0\.0\.1[[:space:]]+$site" /etc/hosts > /dev/null; then
         sudo sed -i '' "/127\.0\.0\.1[[:space:]]\+$site/d" /etc/hosts
