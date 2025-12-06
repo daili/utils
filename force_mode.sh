@@ -105,15 +105,22 @@ HOUR=$(date +%H)
 MIN=$(date +%M)
 TARGET_USER="lidai"
 
-# Helper: return 0 if current time is within allowed Chrome window (17:50 - 18:40)
+# Helper: return 0 if current time is within allowed Chrome window (weekdays 17:50 - 18:40)
 chrome_allowed() {
   # Convert to decimal integers to avoid leading-zero issues
   local h=$((10#$HOUR))
   local m=$((10#$MIN))
+  # date +%u returns day of week 1..7 (Monday..Sunday)
+  local dow
+  dow=$(date +%u)
 
-  if { [ "$h" -eq 17 ] && [ "$m" -ge 50 ]; } || { [ "$h" -eq 18 ] && [ "$m" -le 40 ]; }; then
-    return 0
+  # Only allow on weekdays (Mon-Fri => 1-5)
+  if [ "$dow" -ge 1 ] && [ "$dow" -le 5 ]; then
+    if { [ "$h" -eq 17 ] && [ "$m" -ge 50 ]; } || { [ "$h" -eq 18 ] && [ "$m" -le 40 ]; }; then
+      return 0
+    fi
   fi
+
   return 1
 }
 
@@ -140,7 +147,7 @@ if [ "$MODE" = "on" ]; then
 
     elif [ "$app" = "Google Chrome" ]; then
       if chrome_allowed; then
-        echo "[INFO] Google Chrome is allowed now (within 17:50-18:40)"
+        echo "[INFO] Google Chrome is allowed now (weekday 17:50-18:40)"
       else
         if pgrep -x "$app" > /dev/null; then
           pkill -x "$app"
