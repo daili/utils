@@ -9,6 +9,27 @@ SOCIAL_MEDIA_SITES=(
   "tiktok.com" "www.tiktok.com"
   "twitter.com" "www.twitter.com"
   "discord.com" "www.discord.com"
+
+  # Additional US social / community sites
+  "reddit.com" "www.reddit.com"
+  "snapchat.com" "www.snapchat.com"
+  "pinterest.com" "www.pinterest.com"
+  "linkedin.com" "www.linkedin.com"
+  "tumblr.com" "www.tumblr.com"
+  "nextdoor.com" "www.nextdoor.com"
+  "medium.com" "www.medium.com"
+
+  # Chinese social media / platforms
+  "weibo.com" "www.weibo.com"
+  "weixin.qq.com" "wechat.com" "www.wechat.com"
+  "douyin.com" "www.douyin.com"
+  "xiaohongshu.com" "www.xiaohongshu.com"
+  "bilibili.com" "www.bilibili.com"
+  "qq.com" "www.qq.com"
+  "zhihu.com" "www.zhihu.com"
+  "kuaishou.com" "www.kuaishou.com"
+  "toutiao.com" "www.toutiao.com"
+  "renren.com" "www.renren.com"
 )
 
 SHOPPING_SITES=(
@@ -25,6 +46,19 @@ SHOPPING_SITES=(
   "temu.com" "www.temu.com"
   "muji.com" "www.muji.com"
   "mujistore.com.au" "www.mujistore.com.au"
+
+  # Additional US shopping sites
+  "target.com" "www.target.com"
+  "bestbuy.com" "www.bestbuy.com"
+  "costco.com" "www.costco.com"
+
+  # Chinese e-commerce platforms
+  "taobao.com" "www.taobao.com"
+  "tmall.com" "www.tmall.com"
+  "jd.com" "www.jd.com"
+  "pinduoduo.com" "www.pinduoduo.com"
+  "meituan.com" "www.meituan.com"
+  "dianping.com" "www.dianping.com"
 )
 
 OTHER_SITES=(
@@ -45,6 +79,12 @@ OTHER_SITES=(
   "twitch.tv" "www.twitch.tv"
   "vimeo.com" "www.vimeo.com"
   "aigua.tv" "www.aigua.tv"
+
+  # Chinese streaming / video services
+  "iqiyi.com" "www.iqiyi.com"
+  "youku.com" "www.youku.com"
+  "mgtv.com" "www.mgtv.com"
+  "sohu.com" "www.sohu.com"
 )
 
 # Combine all categories for blocking
@@ -65,10 +105,29 @@ HOUR=$(date +%H)
 MIN=$(date +%M)
 TARGET_USER="lidai"
 
+# Helper: return 0 if current time is within allowed Chrome window (weekdays 17:50 - 18:40)
+chrome_allowed() {
+  # Convert to decimal integers to avoid leading-zero issues
+  local h=$((10#$HOUR))
+  local m=$((10#$MIN))
+  # date +%u returns day of week 1..7 (Monday..Sunday)
+  local dow
+  dow=$(date +%u)
+
+  # Only allow on weekdays (Mon-Fri => 1-5)
+  if [ "$dow" -ge 1 ] && [ "$dow" -le 5 ]; then
+    if { [ "$h" -eq 17 ] && [ "$m" -ge 50 ]; } || { [ "$h" -eq 18 ] && [ "$m" -le 40 ]; }; then
+      return 0
+    fi
+  fi
+
+  return 1
+}
+
 if [ "$MODE" = "on" ]; then
   blocked_any=false
   for site in "${BLOCKED_SITES[@]}"; do
-    if ! grep -E "^[^#]*127\.0\.0\.1[[:space:]]+$site" /etc/hosts > /dev/null; then
+    if ! grep -E "^[^#]*127\.0\.0\.1[[:space:]]+$site" /etc/hosts > /dev/null 2>&1; then
       echo "127.0.0.1 $site" >> /etc/hosts
       echo "[INFO] Blocked site: $site"
       blocked_any=true
@@ -85,6 +144,18 @@ if [ "$MODE" = "on" ]; then
           quit_any=true
         fi
       fi
+
+    elif [ "$app" = "Google Chrome" ]; then
+      if chrome_allowed; then
+        echo "[INFO] Google Chrome is allowed now (weekday 17:50-18:40)"
+      else
+        if pgrep -x "$app" > /dev/null; then
+          pkill -x "$app"
+          echo "[INFO] Killed app: $app (outside allowed window)"
+          quit_any=true
+        fi
+      fi
+
     else
       if pgrep -x "$app" > /dev/null; then
         pkill -x "$app"
@@ -99,8 +170,13 @@ elif [ "$MODE" = "off" ]; then
   cp /etc/hosts /etc/hosts.bak
   echo "[INFO] Backed up /etc/hosts to /etc/hosts.bak"
   for site in "${BLOCKED_SITES[@]}"; do
-    if grep -E "^[^#]*127\.0\.0\.1[[:space:]]+$site" /etc/hosts > /dev/null; then
-      sed -i '' "/^127\.0\.0\.1 $site/d" /etc/hosts
+    if grep -E "^[^#]*127\.0\.0\.1[[:space:]]+$site" /etc/hosts > /dev/null 2>&1; then
+      # Use GNU sed if available, otherwise use macOS sed -i ''
+      if sed --version >/dev/null 2>&1; then
+        sed -i "/^127\.0\.0\.1 $site/d" /etc/hosts
+      else
+        sed -i '' "/^127\.0\.0\.1 $site/d" /etc/hosts
+      fi
       echo "[INFO] Unblocked site: $site"
     fi
   done
