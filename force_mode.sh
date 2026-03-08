@@ -62,8 +62,8 @@ SHOPPING_SITES=(
 )
 
 OTHER_SITES=(
-  "spotify.com" "www.spotify.com"
-  "open.spotify.com"
+  #"spotify.com" "www.spotify.com"
+  #"open.spotify.com"
   "netflix.com" "www.netflix.com"
   "stan.com.au" "www.stan.com.au"
   "primevideo.com" "www.primevideo.com"
@@ -95,7 +95,7 @@ DISTRACTING_APPS=(
   "FaceTime"
   "Steam"
   "Discord"
-  "Spotify"
+  #"Spotify"
   "Roblox"
   "Minecraft"
 )
