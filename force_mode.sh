@@ -1,4 +1,13 @@
 #!/bin/bash
+#30 8-15 * * 1-5  bash $HOME/.utils/force_mode.sh off  > /tmp/force_mode.log 2>&1
+
+#* 0-7  * * 1-5  bash $HOME/.utils/force_mode.sh on >/tmp/forcemode.log 2>&1
+#0-29 8 *  * * 1-5  bash $HOME/.utils/force_mode.sh on >/tmp/forcemode.log 2>&1
+
+#31-59 15 * * 1-5  $HOME/.utils/force_mode.sh on >/tmp/forcemode.log 2>&1
+#* 16-23  * * 1-5  $HOME/.utils/force_mode.sh on >/tmp/forcemode.log 2>&1
+
+#* *  * * 6,0  $HOME/.utils/force_mode.sh on >/tmp/forcemode.log 2>&1
 
 MODE="$1"  # Accept "on" or "off" as the first argument
 
